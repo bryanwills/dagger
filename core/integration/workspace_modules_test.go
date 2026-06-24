@@ -252,6 +252,58 @@ func (WorkspaceModulesSuite) TestWorkspaceModuleUninstall(ctx context.Context, t
 	})
 }
 
+// TestWorkspaceModuleGenerate covers generation for modules registered in a
+// workspace.
+func (WorkspaceModulesSuite) TestWorkspaceModuleGenerate(ctx context.Context, t *testctx.T) {
+	setupSDKManagedGoModule := func(ctx context.Context, t *testctx.T) (string, string) {
+		workdir := t.TempDir()
+		initGitRepo(ctx, t, workdir)
+
+		_, err := hostDaggerExecRaw(ctx, t, workdir, "--silent", "sdk", "install", "go")
+		require.NoError(t, err)
+
+		_, err = hostDaggerExecRaw(ctx, t, workdir, "--silent", "--auto-apply", "module", "init", "go", "myapp")
+		require.NoError(t, err)
+
+		moduleDir := filepath.Join(workdir, ".dagger", "modules", "myapp")
+		require.NoError(t, os.WriteFile(filepath.Join(moduleDir, "main.go"), []byte(`package main
+
+type Myapp struct{}
+`), 0o644))
+
+		return workdir, moduleDir
+	}
+
+	for _, tc := range []struct {
+		name string
+		cwd  func(string) string
+	}{
+		{
+			name: "from .dagger",
+			cwd:  func(workdir string) string { return filepath.Join(workdir, ".dagger") },
+		},
+		{
+			name: "from .dagger/modules",
+			cwd:  func(workdir string) string { return filepath.Join(workdir, ".dagger", "modules") },
+		},
+	} {
+		t.Run(tc.name, func(ctx context.Context, t *testctx.T) {
+			workdir, moduleDir := setupSDKManagedGoModule(ctx, t)
+			cwd := tc.cwd(workdir)
+
+			out, err := hostDaggerExecRaw(ctx, t, cwd, "--silent", "generate", "-y")
+			require.NoError(t, err, "%s: %s", tc.name, string(out))
+
+			_, err = os.Stat(filepath.Join(moduleDir, "internal", "dagger", "dagger.gen.go"))
+			require.NoError(t, err, tc.name)
+
+			nestedGeneratedClient := filepath.Join(cwd, ".dagger", "modules", "myapp", "internal", "dagger", "dagger.gen.go")
+			_, err = os.Stat(nestedGeneratedClient)
+			require.True(t, os.IsNotExist(err), "expected generate from %s to write at workspace root, not %s", tc.name, nestedGeneratedClient)
+		})
+	}
+}
+
 // TestWorkspaceModuleMutation should cover updates and config-level conflicts
 // around configured modules.
 func (WorkspaceModulesSuite) TestWorkspaceModuleMutation(ctx context.Context, t *testctx.T) {
