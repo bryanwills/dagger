@@ -123,19 +123,19 @@ func TestWorkspaceModuleForRuntime(t *testing.T) {
 		{
 			name:    "go",
 			runtime: "go",
-			want:    WorkspaceModule{Name: "go-sdk", Source: "github.com/dagger/go-sdk"},
+			want:    WorkspaceModule{Name: "go-sdk", Source: "github.com/dagger/go-sdk@adf60252445825c0d1fa2849f69eefe230d7f154"},
 			wantOK:  true,
 		},
 		{
 			name:    "typescript",
 			runtime: "typescript",
-			want:    WorkspaceModule{Name: "typescript-sdk", Source: "github.com/dagger/typescript-sdk"},
+			want:    WorkspaceModule{Name: "typescript-sdk", Source: "github.com/dagger/typescript-sdk@19dd24aabefaf25f49e21a232eb5b72103627cea"},
 			wantOK:  true,
 		},
 		{
 			name:    "python",
 			runtime: "python",
-			want:    WorkspaceModule{Name: "python-sdk", Source: "github.com/dagger/python-sdk"},
+			want:    WorkspaceModule{Name: "python-sdk", Source: "github.com/dagger/python-sdk@da2ed282fd1cffda8a5ef7242b2aa562182b5e4f"},
 			wantOK:  true,
 		},
 		{
@@ -153,7 +153,7 @@ func TestWorkspaceModuleForRuntime(t *testing.T) {
 		{
 			name:    "dang",
 			runtime: "dang",
-			want:    WorkspaceModule{Name: "dang-sdk", Source: "github.com/dagger/dang-sdk"},
+			want:    WorkspaceModule{Name: "dang-sdk", Source: "github.com/dagger/dang-sdk@a21728f312f3595e067b715d2a93ec4dbb16fb88"},
 			wantOK:  true,
 		},
 		{

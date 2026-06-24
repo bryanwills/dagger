@@ -112,7 +112,10 @@ func sdkResolveInstall(input string) (ref string, installName string, asSDKName 
 
 func sdkRegistryRepoBase(repo string) string {
 	if idx := strings.LastIndex(repo, "/"); idx != -1 {
-		return repo[idx+1:]
+		repo = repo[idx+1:]
+	}
+	if idx := strings.Index(repo, "@"); idx != -1 {
+		return repo[:idx]
 	}
 	return repo
 }
